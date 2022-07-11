@@ -1,0 +1,42 @@
+version: 2
+mergeable:
+  - when: pull_request.opened
+    name: Greet a contributor
+    validate: []
+    pass:
+      - do: comment
+        payload:
+          body: >
+            嘿，感谢你的贡献 ❤️ 如果你的 PR 未通过检查，你可以点击底部的 checks Details 了解具体不合规的地方。
+            你可以查阅 [lawporter 开发规约](https://github.com/lawporter/spec)了解 PR 提交细节。这里列出一些你可能忽略的小 Tips：
+              - PR 标题的格式与 [Angular Commit Message Guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines) 一致；
+              - 为了帮助 reviewer 更方便的代码 review，充分的填写 PR 描述；
+              - PR 需要设置 label 和 assignee；
+              - 请尽可能控制一次 PR 的代码变更行数在 350 行内。这里介绍两种方法优化你的 PR 提交：
+                - （推荐）将目前的主分支迁出一个你的分支，比如 feat/A，然后在 feat/A 上将你的 PR 拆分成多次 PR 提交，比如 feat/A-one 和 feat/A-two，逐个合并到 feat/A，然后再将 feat/A 合并至主分支上；
+                - 整理目前 PR 的内容，将其划分成多个 commit，按功能依次提交，reviewer 根据 commit 的内容可以逐个审查或跳过一些无需 review 的 PR。
+  - when: pull_request.*
+    validate:
+      - do: title
+        must_include:
+          regex: '^(feat|fix|perf|refactor|docs|style|test|chore)(\(\S+\))?: ([a-z]+) ((\S|\w)+ ?)+'
+          regex_flag: "none"
+          message: PR 标题不规范
+      - do: label
+        no_empty:
+          enabled: true
+          message: label 不应该为空
+      - do: assignee
+        min:
+          count: 1
+          message: assignee 不应该为空
+      - do: description
+        no_empty:
+          enabled: true
+          message: 描述不应该为空
+      - do: size
+        ignore: ["package.json", "yarn.lock"]
+        lines:
+          total:
+            count: 350
+            message: 代码变更不应超过 350 行
